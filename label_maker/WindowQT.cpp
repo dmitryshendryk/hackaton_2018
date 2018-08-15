@@ -9,14 +9,15 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)  
 {
   this->resize(1000,640);
-  
+//    this->resize(1920,1280);
+
 //   imagearea=new QLabel(this);
 //   imagearea->setGeometry(20,10,840,480);
 //   imagearea->setStyleSheet("border: 4px solid  black" );
 //   imagearea->setFrameStyle(QFrame::Box);
   
   modelarea=new ThreeDLabel(this);
-  modelarea->setGeometry(20,10,840,480);
+  modelarea->setGeometry(20,10,340,480);
   modelarea->setStyleSheet("border: 4px solid  black" );
   modelarea->setFrameStyle(QFrame::Box);
 
@@ -56,13 +57,13 @@ MainWindow::MainWindow(QWidget *parent) :
    model_thread->start();
 
 
-  object_display_zone=new QTableWidget(this);
-  object_display_zone->setGeometry(870,10,140,480);
-  object_display_zone->setColumnCount(2);
-  QStringList header;  
-  header<<"NAME"<<"NUM";
-  object_display_zone->setHorizontalHeaderLabels(header);
-  object_display_zone->horizontalHeader()->setDefaultSectionSize(70); 
+//   object_display_zone=new QTableWidget(this);
+//   object_display_zone->setGeometry(870,10,140,480);
+//   object_display_zone->setColumnCount(2);
+//   QStringList header;  
+//   header<<"NAME"<<"NUM";
+//   object_display_zone->setHorizontalHeaderLabels(header);
+//   object_display_zone->horizontalHeader()->setDefaultSectionSize(70); 
   
   connect(read_button,SIGNAL(clicked()),this,SLOT(read_data()));
   connect (start_pt,SIGNAL(clicked()),this,SLOT(ini_pcl()));
@@ -74,7 +75,146 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(modelarea,SIGNAL(zoom(float)),model_rec,SLOT(zoom(float)),Qt::QueuedConnection);
   connect(bt_mdlabel,SIGNAL(clicked()),model_rec,SLOT(auto_label()),Qt::QueuedConnection);
   emit test_paint();
+
+   qDebug()<<"mainThread ID"<<QThread::currentThreadId();
+
+   color_img=new QImage();
+   depth_img=new QImage();
+   tpx=new QPixmap();
+   dtpx=new QPixmap();
+   color_img_states=new QLabel();
+   color_img_states->setParent(this);
+   color_img_states->setGeometry(20,0,260,20);
+//    color_img_states->setText("No color camera signalf recieved");
+
+   color_img_area=new QLabel(this);
+   color_img_area->setText("NO SIGNAL");
+
+   color_img_area->setGeometry(380,10,220,240);
+   color_img_area->setStyleSheet("border: 5px solid  black" );
+   color_img_area->setFrameStyle(QFrame::Box);
+
+   depth_img_states=new QLabel();
+   depth_img_states->setParent(this);
+   depth_img_states->setGeometry(680,0,260,20);
+//    depth_img_states->setText("No depth camera signal recieved");
+
+
+   depth_img_area=new QLabel(this);
+
+   depth_img_area->setStyleSheet("border: 5px solid  black" );
+   depth_img_area->setFrameStyle(QFrame::Box);
+
+   depth_img_area->setGeometry(620,10,220,240);
+//    depth_img_area->setText("NO SIGNAL");
+
+
+
+
+   tracking_img=new QLabel(this);
+   tracking_img->setGeometry(860,10,220,240);
+//    tracking_img->setText("NO SIGNAL");
+   tracking_img->setStyleSheet("border: 5px solid  black" );
+   tracking_img->setFrameStyle(QFrame::Box);
+    
+   counter_img=new QLabel(this);
+   counter_img->setGeometry(380,260,220,240);
+   counter_img->setText("NO SIGNAL");
+   counter_img->setStyleSheet("border: 5px solid  black");
+   counter_img->setFrameStyle(QFrame::Box);
+
+   color_wrapper=new image_wrapper(0,color_img_area);
+   depth_wrapper=new image_wrapper(1,depth_img_area);
+
+   QThread *tr1=new QThread();
+   QThread *tr2=new QThread();
+
+   color_wrapper->moveToThread(tr1);
+   depth_wrapper->moveToThread(tr2);
+
+   tr1->start();
+   tr2->start();
+
+   tracking_wrapper=new image_wrapper(0,tracking_img);
+   counter_wrapper=new image_wrapper(0,counter_img);
+   
+   QThread *tr3=new QThread();
+   QThread *tr4=new QThread();
+   QThread *tr5=new QThread();
+   tracking_wrapper->moveToThread(tr4);
+   counter_wrapper->moveToThread(tr5);
+   tr4->start();
+   tr5->start();
+
+//    s_wrapeer=new slam_wrapper(QString("ORBvoc.txt"),QString("Realsense_Tum.yaml"));
+//    s_wrapeer->moveToThread(tr3);
+//    tr3->start();
+   
+
+    testoglarea=new QLabel(this);
+    testoglarea->setGeometry(620,260,220,240);
+    testoglarea->setStyleSheet("border: 5px solid  black");
+    testoglarea->setFrameStyle(QFrame::Box);
+    
+    QThread *oglwrapperthread=new QThread();
+    opengl_wrapper=new image_wrapper(0,testoglarea);
+    opengl_wrapper->moveToThread(oglwrapperthread);
+    oglwrapperthread->start();
+
+    QThread * oglthread=new QThread();
+    rec =new ogl_receiever(640, 480);
+    rec->moveToThread(oglthread);
+    oglthread->start();
+    
+    SaveButton=new QPushButton(this);
+    SaveButton->setGeometry(1350,450,80,40);
+    SaveButton->setText(QString("Save PointCloud"));
+
+    QFont font ( "Microsoft YaHei", 7, 50); 
+    SaveButton->setFont(font);
+    
+    controler=new control_Thread();
+    controler->start_watching(); 
+    connect(controler,SIGNAL(finished()),this,SLOT(update_frame()),Qt::QueuedConnection);
   
+
+  
+}
+
+void MainWindow::update_frame()
+{
+
+    qDebug()<<"slot thread"<<QThread::currentThreadId();
+    this->color_img_states->setText("RGB Camera has been found");
+    this->depth_img_states->setText("Depth Camera has been found");
+    // s_wrapeer->ini();
+
+
+    connect(controler,SIGNAL(New_color_data(uchar *,int ,int )),color_wrapper,SLOT(get_Frame(uchar*,int,int)),Qt::BlockingQueuedConnection);
+    connect(controler,SIGNAL(New_depth_data_colormap(uchar * ,int ,int )),depth_wrapper,SLOT(get_Frame(uchar*,int,int)),Qt::BlockingQueuedConnection);
+
+
+
+    // connect(controler,SIGNAL(New_color_data(uchar *,int ,int )),s_wrapeer,SLOT(get_color_data(uchar*,int,int)),Qt::QueuedConnection);
+    // connect(controler,SIGNAL(New_depth_data(uchar * ,int ,int )),s_wrapeer,SLOT(get_depth_data(uchar*,int,int)),Qt::QueuedConnection);
+    //this must be blocking don't try any other connection way
+    // connect(s_wrapeer,SIGNAL(update_tracking(uchar *,int ,int )),tracking_wrapper,SLOT(get_Frame(uchar* ,int ,int )),Qt::BlockingQueuedConnection);
+
+    
+    test_frame_wrapper=new frame_wrapper();
+    QThread *tr7=new QThread();
+    test_frame_wrapper->moveToThread(tr7);
+    tr7->start();
+    connect(controler,SIGNAL(New_color_frame(rs2::frame)),test_frame_wrapper,SLOT(get_color(rs2::frame)),Qt::BlockingQueuedConnection);
+    connect(controler,SIGNAL(New_depth_frame(rs2::depth_frame)),test_frame_wrapper,SLOT(get_depth(rs2::depth_frame )),Qt::BlockingQueuedConnection);
+
+
+
+    connect(test_frame_wrapper,SIGNAL(update_counter(uchar *,int ,int )),counter_wrapper,SLOT(get_Frame(uchar* ,int ,int )),Qt::BlockingQueuedConnection);     
+    // connect(s_wrapeer,SIGNAL(tracking_data(std::vector<std::vector<float>>& ,std::vector<cv::Mat>&)),rec,SLOT(get_data(std::vector<std::vector<float>>& ,std::vector<cv::Mat>&)),Qt::BlockingQueuedConnection);
+    connect(rec,SIGNAL(new_data(QImage)),opengl_wrapper,SLOT(get_Frame(QImage)),Qt::QueuedConnection);
+    // connect(SaveButton,SIGNAL(clicked()),s_wrapeer,SLOT(save_pcl()),Qt::QueuedConnection);
+
 }
 void MainWindow::ini_pcl()
 {

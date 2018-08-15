@@ -16,6 +16,16 @@
 #include "slamcore.hpp"
 #include "receive_wrapper.hpp"
 #include "ThreeDLabel.hpp"
+
+#include "image_wrapper.hpp"
+#include "frame_wrapper.hpp"
+
+#include "openglwrapper.hpp"
+#include "receive_wrapper.hpp"
+
+#include "control.hpp"
+#include "slam_wrapper.hpp"
+
 using namespace cv;
 class MainWindow : public QMainWindow
 {
@@ -36,6 +46,7 @@ public slots:
     void update_pic(Mat m);
     void read_data();
     void updata_model(QImage m);
+    void update_frame();
 private:
     label_maker *lb;
     QLabel * imagearea;
@@ -48,6 +59,21 @@ private:
     ogl_receiever * model_rec;
     void shut_down_viewer();
     int index=0;
+
+      QLabel * color_img_states,*depth_img_states;
+    QLabel * color_img_area,*depth_img_area,*tracking_img,*counter_img,*testoglarea;
+    QPushButton *SaveButton;
+    
+    image_wrapper *depth_wrapper,*color_wrapper,*tracking_wrapper,*counter_wrapper,*opengl_wrapper;
+    frame_wrapper *test_frame_wrapper;
+
+    control_Thread * controler;
+
+    QImage *color_img,*depth_img;
+    QPixmap *tpx,*dtpx;
+    slam_wrapper *s_wrapeer;
+    
+    ogl_receiever * rec;
 };
 
 #endif // MAINWINDOW_H

@@ -49,7 +49,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    qRegisterMetaType<cv::Mat>("Mat");
+   qRegisterMetaType<cv::Mat>("Mat");
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

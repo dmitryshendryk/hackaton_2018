@@ -67,4 +67,5 @@ target_link_libraries(label_maker
   Qt5::Widgets
   Qt5::Core
   Qt5::Gui
+  -lrealsense2
 )

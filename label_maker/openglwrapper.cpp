@@ -24,6 +24,7 @@ GLuint load_texture(const char *file_name)
 	GLubyte *pixels = NULL;
 	FILE *pFile;
 
+	qDebug() << file_name << "\n";
 	if((pFile=fopen(file_name,"rb"))==NULL)
 	{
 		cout<<"Read texture error"<<endl;
@@ -197,10 +198,10 @@ void ReadMtl(string cd,string mtlfile,map<string,Material> &mat)
 			is>>emission[0]>>emission[1]>>emission[2];
 			qDebug()<<"Ke"<<emission[0]<<emission[1]<<emission[2];
 		}
-		else if(word=="map_Ka")
+		else if(word=="map_Ka" || word=="map_Kd")
 		{
 			is>>fname;
-			map = load_texture(fname.c_str());
+			map = load_texture("/home/dmitry/Documents/model/10113_Flat_Screen_Television_v1_Diffuse.jpg");
 			hasmap = true;
 		}
 		else if(word=="map_refl")
@@ -208,7 +209,7 @@ void ReadMtl(string cd,string mtlfile,map<string,Material> &mat)
 
            
 			is>>fname;
-			map=load_texture("/home/lyz/文档/Map__40_Falloff.tga.txt");
+			map=load_texture("/home/dmitry/Documents/model/10113_Flat_Screen_Television_v1_Diffuse.jpg");
 			qDebug()<<"gen texture!!!!!!!!!!!!!!!!!!!!!!!!!!"<<map;
 			hasmap=true;
 
@@ -350,7 +351,7 @@ void ReadObj(string &cd,string file,map<string,Object> &m,set<string> &n,map<str
 		else if(word=="mtllib")
 		{
 			is>>word;
-			ReadMtl(cd,"/home/lyz/文档/conrod.mtl.txt",matname);
+			ReadMtl(cd,"/home/dmitry/Documents/model/10113_Flat_Screen_Television_v1_L3.mtl.txt",matname);
 		}
 		else if(word=="usemtl")
 		{
@@ -607,7 +608,7 @@ void opengl_core::paintGL()
 // }
 void opengl_core::read_model_data()
 {
-   ReadObj(cd,"/home/lyz/文档/conrod.obj.txt",objmap,objname,matname);
+   ReadObj(cd,"/home/dmitry/Documents/model/10113_Flat_Screen_Television_v1_L3.obj.txt",objmap,objname,matname);
     // string line;
     // fstream f;
     // f.open("/home/lyz/文档/newgirl.obj.txt", ios::in);
