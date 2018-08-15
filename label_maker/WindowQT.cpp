@@ -146,9 +146,9 @@ MainWindow::MainWindow(QWidget *parent) :
    tr4->start();
    tr5->start();
 
-//    s_wrapeer=new slam_wrapper(QString("ORBvoc.txt"),QString("Realsense_Tum.yaml"));
-//    s_wrapeer->moveToThread(tr3);
-//    tr3->start();
+   s_wrapeer=new slam_wrapper(QString("ORBvoc.txt"),QString("Realsense_Tum.yaml"));
+   s_wrapeer->moveToThread(tr3);
+   tr3->start();
    
 
     testoglarea=new QLabel(this);
@@ -187,7 +187,7 @@ void MainWindow::update_frame()
     qDebug()<<"slot thread"<<QThread::currentThreadId();
     this->color_img_states->setText("RGB Camera has been found");
     this->depth_img_states->setText("Depth Camera has been found");
-    // s_wrapeer->ini();
+    s_wrapeer->ini();
 
 
     connect(controler,SIGNAL(New_color_data(uchar *,int ,int )),color_wrapper,SLOT(get_Frame(uchar*,int,int)),Qt::BlockingQueuedConnection);
@@ -195,10 +195,10 @@ void MainWindow::update_frame()
 
 
 
-    // connect(controler,SIGNAL(New_color_data(uchar *,int ,int )),s_wrapeer,SLOT(get_color_data(uchar*,int,int)),Qt::QueuedConnection);
-    // connect(controler,SIGNAL(New_depth_data(uchar * ,int ,int )),s_wrapeer,SLOT(get_depth_data(uchar*,int,int)),Qt::QueuedConnection);
+    connect(controler,SIGNAL(New_color_data(uchar *,int ,int )),s_wrapeer,SLOT(get_color_data(uchar*,int,int)),Qt::QueuedConnection);
+    connect(controler,SIGNAL(New_depth_data(uchar * ,int ,int )),s_wrapeer,SLOT(get_depth_data(uchar*,int,int)),Qt::QueuedConnection);
     //this must be blocking don't try any other connection way
-    // connect(s_wrapeer,SIGNAL(update_tracking(uchar *,int ,int )),tracking_wrapper,SLOT(get_Frame(uchar* ,int ,int )),Qt::BlockingQueuedConnection);
+    connect(s_wrapeer,SIGNAL(update_tracking(uchar *,int ,int )),tracking_wrapper,SLOT(get_Frame(uchar* ,int ,int )),Qt::BlockingQueuedConnection);
 
     
     test_frame_wrapper=new frame_wrapper();
@@ -211,7 +211,7 @@ void MainWindow::update_frame()
 
 
     connect(test_frame_wrapper,SIGNAL(update_counter(uchar *,int ,int )),counter_wrapper,SLOT(get_Frame(uchar* ,int ,int )),Qt::BlockingQueuedConnection);     
-    // connect(s_wrapeer,SIGNAL(tracking_data(std::vector<std::vector<float>>& ,std::vector<cv::Mat>&)),rec,SLOT(get_data(std::vector<std::vector<float>>& ,std::vector<cv::Mat>&)),Qt::BlockingQueuedConnection);
+    connect(s_wrapeer,SIGNAL(tracking_data(std::vector<std::vector<float>>& ,std::vector<cv::Mat>&)),rec,SLOT(get_data(std::vector<std::vector<float>>& ,std::vector<cv::Mat>&)),Qt::BlockingQueuedConnection);
     connect(rec,SIGNAL(new_data(QImage)),opengl_wrapper,SLOT(get_Frame(QImage)),Qt::QueuedConnection);
     // connect(SaveButton,SIGNAL(clicked()),s_wrapeer,SLOT(save_pcl()),Qt::QueuedConnection);
 

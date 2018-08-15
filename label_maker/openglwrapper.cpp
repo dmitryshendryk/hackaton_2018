@@ -287,10 +287,10 @@ void ReadObj(string &cd,string file,map<string,Object> &m,set<string> &n,map<str
 			VERTEX p;
 			
 			is>>p.x>>p.y>>p.z;
-			//qDebug()<<p.x<<p.y<<p.z;
-			p.x*=4000.0;
-			p.y*=4000.0;
-			p.z*=4000.0;
+			qDebug()<<p.x<<p.y<<p.z;
+			p.x*=0.05;
+			p.y*=0.05;
+			p.z*=0.05;
 			vertexs.push_back(p);
 		}
 		else if(word=="vt")
@@ -351,7 +351,7 @@ void ReadObj(string &cd,string file,map<string,Object> &m,set<string> &n,map<str
 		else if(word=="mtllib")
 		{
 			is>>word;
-			ReadMtl(cd,"/home/dmitry/Documents/model/10113_Flat_Screen_Television_v1_L3.mtl.txt",matname);
+			ReadMtl(cd,"/home/dmitry/Documents/model/10113_Flat_Screen_Television_v1_L3.mtl",matname);
 		}
 		else if(word=="usemtl")
 		{
@@ -608,7 +608,7 @@ void opengl_core::paintGL()
 // }
 void opengl_core::read_model_data()
 {
-   ReadObj(cd,"/home/dmitry/Documents/model/10113_Flat_Screen_Television_v1_L3.obj.txt",objmap,objname,matname);
+   ReadObj(cd,"/home/dmitry/Documents/model/10113_Flat_Screen_Television_v1_L3.obj",objmap,objname,matname);
     // string line;
     // fstream f;
     // f.open("/home/lyz/文档/newgirl.obj.txt", ios::in);

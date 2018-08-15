@@ -17,9 +17,15 @@
 #include <QMetaType>
 using namespace std;
 //#define HARRIS
+#include <pcl/common/common.h>
+#include <pcl/io/obj_io.h>
+#include <pcl/io/vtk_lib_io.h>
+#include <pcl/visualization/pcl_visualizer.h>
 
+#include<pcl/io/ply_io.h>
+#include <pcl/io/vtk_lib_io.h>
 
-
+using namespace pcl;
 // Mutex: //
 // boost::mutex cloud_mutex;
 
@@ -49,11 +55,34 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-   qRegisterMetaType<cv::Mat>("Mat");
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-    return a.exec();
+//    qRegisterMetaType<cv::Mat>("Mat");
+//     QApplication a(argc, argv);
+//     MainWindow w;
+//     w.show();
+//     return a.exec();
+
+
+
+pcl::TextureMesh mesh1;
+pcl::io::loadPolygonFileOBJ ("/home/dmitry/Documents/model/10113_Flat_Screen_Television_v1_L3.obj", mesh1);
+pcl::TextureMesh mesh2;
+pcl::io::loadOBJFile ("/home/dmitry/Documents/model/10113_Flat_Screen_Television_v1_L3.obj", mesh2);
+mesh1.tex_materials = mesh2.tex_materials;
+pcl::visualization::PCLVisualizer visu("Test");
+visu.setBackgroundColor(1,1,1);
+visu.registerVisualizationCallback
+visu.addTextureMesh (mesh1,"texture");
+visu.spin ();
+
+
+// pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ);
+// pcl::PLYReader Reader;
+// Reader.read("/home/dmitry/Documents/model/3DScan_face.ply", *cloud);
+
+// pcl::visualization::PCLVisualizer viewer;
+//   viewer.addPointCloud(cloud);
+//   viewer.spin();
+  return 0;
 }
 
 
